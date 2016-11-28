@@ -6,14 +6,48 @@ import time
 from optparse import OptionParser
 
 try:
-    from ovirtsdk.api import API
+    from ovirtsdk3x4.api import API
 except:
     print "Please re-run after you have installed 'ovirt-engine-sdk-python'"
     print "Example: easy_install ovirt-engine-sdk-python"
     sys.exit()
 
 
+def debug(f):
+    import ipdb
+
+    def inner(*args, **kwargs):
+        with ipdb.launch_ipdb_on_exception():
+            return f(*args, **kwargs)
+    return inner
+
+
 DEFAULT_API_USER = "admin@internal"
+
+
+@debug
+def main():
+    opts = parse_args()
+    debug = opts.debug
+    setup_logging(debug)
+
+    api_host = opts.api_host
+    api_user = opts.api_user
+    api_pass = opts.api_pass
+    vm_id = opts.vm_id
+
+    url = "https://%s/ovirt-engine/api" % (api_host)
+
+    api = API(url=url, username=api_user, password=api_pass, insecure=True)
+    if not api:
+        print "Failed to connect to '%s'" % (url)
+        sys.exit(1)
+
+    ip = get_ip(api, vm_id)
+    if not ip:
+        sys.exit(1)
+    print ip
+    sys.exit(0)
 
 
 def parse_args():
@@ -79,25 +113,4 @@ def get_ip(api, vm_id):
     return None
 
 if __name__ == "__main__":
-
-    opts = parse_args()
-    debug = opts.debug
-    setup_logging(debug)
-
-    api_host = opts.api_host
-    api_user = opts.api_user
-    api_pass = opts.api_pass
-    vm_id = opts.vm_id
-
-    url = "https://%s" % (api_host)
-
-    api = API(url=url, username=api_user, password=api_pass, insecure=True)
-    if not api:
-        print "Failed to connect to '%s'" % (url)
-        sys.exit(1)
-
-    ip = get_ip(api, vm_id)
-    if not ip:
-        sys.exit(1)
-    print ip
-    sys.exit(0)
+    main()

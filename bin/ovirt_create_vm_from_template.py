@@ -5,8 +5,8 @@ import sys
 from optparse import OptionParser
 
 try:
-    from ovirtsdk.api import API
-    from ovirtsdk.xml import params
+    from ovirtsdk3x4.api import API
+    from ovirtsdk3x4.xml import params
 except:
     print "Please re-run after you have installed 'ovirt-engine-sdk-python'"
     print "Example: easy_install ovirt-engine-sdk-python"
